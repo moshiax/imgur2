@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Imgur Image Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* Фиксировать фон */
+        }
+
+        .image-grid {
+            display: none;
+			border: none;
+            grid-gap: 0px; 
+        }
+
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            overflow: auto;
+            position: relative;
+        }
+.imgur-link {
+    position: absolute;
+    top: 10px; /* Расположить ссылку снизу контейнера изображения */
+    left: 10px; /* Расположить ссылку справа контейнера изображения */
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.img-container {
+    width: 100vw; /* Ширина контейнера - 90% ширины окна браузера */
+    height: 100vh; /* Высота контейнера - 90% высоты окна браузера */
+    margin: auto; /* Центрируем контейнер с изображением */
+    position: relative; /* Устанавливаем позиционирование контейнера */
+    display: flex; /* Используем flexbox для центрирования изображения */
+    justify-content: center;
+    align-items: center;
+}
+
+.img-container img {
+    max-width: 100%; /* Максимальная ширина изображения - 100% */
+    max-height: 100%; /* Максимальная высота изображения - 100% */
+    width: auto; /* Автоматически определяем ширину изображения */
+    height: auto; /* Автоматически определяем высоту изображения */
+    object-fit: contain; /* Масштабируем изображение, чтобы оно полностью помещалось в контейнере */
+}
+
+
+
+.container {
+    width: 100%; /* Ширина контейнера - 100% */
+    height: 100vh; /* Высота контейнера - 100% высоты окна браузера */
+}
+
+
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="image-grid" id="imageGrid">
+            <!-- Images will be inserted here dynamically -->
+        </div>
+    </div>
+
+    <script>
+        function generateRandomImgurImage() {
+            const char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            const id = Array.from({ length: 5 }, () => char[Math.floor(Math.random() * char.length)]).join("") + "";
+            return `https://i.imgur.com/${id}.png`;
+        }
+
+
+function checkImageLoad(image) {
+    if (image.naturalWidth !== 161) {
+        image.style.opacity = 1;
+        openImage(image);
+    } else {
+        reloadImage(image);
+    }
+}
+
+
+        function reloadImage(image) {
+            image.src = generateRandomImgurImage();
+        }
+
+function populateImageGrid() {
+    const imageGrid = document.getElementById("imageGrid");
+    imageGrid.innerHTML = ''; // Очищаем содержимое перед добавлением новых изображений
+    const numImages = 1;
+    for (let i = 0; i < numImages; i++) {
+        const url = generateRandomImgurImage();
+        const img = `<img src="${url}" style="opacity:0;" onload="checkImageLoad(this)" onclick="openImage(this)">`;
+        imageGrid.insertAdjacentHTML("beforeend", img);
+    }
+}
+
+
+        // Generate initial images
+        populateImageGrid();
+
+let modal = null; // Объявляем переменную modal в глобальной области видимости
+        // Function to open image in a modal
+function openImage(image) {
+    // Очищаем старое полноразмерное изображение, если оно существует
+    if (modal !== null) {
+        document.body.removeChild(modal);
+    }
+
+    modal = document.createElement('div');
+    modal.className = 'modal';
+
+    const container = document.createElement('div');
+    container.className = 'img-container';
+
+    const img = document.createElement('img');
+    img.style.maxWidth = '100%';
+    img.style.maxHeight = '100%';
+    img.onload = function() {
+        // Отображаем полноразмерное изображение при загрузке
+        document.body.appendChild(modal);
+    };
+    img.src = image.src.replace('b.png', '.png');
+
+    container.appendChild(img);
+    modal.appendChild(container);
+
+    // Добавляем текстовую ссылку с URL изображения
+    const imgurLinkText = document.createElement('div');
+    imgurLinkText.className = 'imgur-link';
+    imgurLinkText.textContent = image.src; // Показываем URL изображения
+    imgurLinkText.style.position = 'absolute';
+    modal.appendChild(imgurLinkText);
+}
+
+
+
+
+function triggerFunction() {
+    populateImageGrid();
+}
+
+// Вызываем функцию сразу, чтобы она запустилась и в первый раз
+triggerFunction();
+
+// Запускаем функцию каждые 4 секунд
+setInterval(triggerFunction, 1000);
+    </script>
+</body>
+</html>
